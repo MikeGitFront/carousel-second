@@ -168,17 +168,76 @@ const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
         }
         if ((e.clientX - clickX < window.innerWidth / 2) && (clickX > 0 && clickX < window.innerWidth / 2)) {
             const diff = startPos - translation
-            console.log(diff)
             setTranslation(prev => prev + diff)
         }
-
-
         setIsMoving(false)
     }
 
     const swipeLeave = () => {
         setIsMoving(false)
     }
+
+
+
+
+    const swipeMobileStart = (e) => {
+        setIsMoving(true)
+        setClickX(e.changedTouches[0].clientX)
+        setStartPos(translation)
+    }
+    const swipeMobileMove = () => {
+        if (isMoving) {
+            if (clickX < window.innerWidth && clickX > window.innerWidth / 2) {
+                if (translation === ((-items.length * 100 / slidesToShow) + 100)) {
+                    return
+                }
+                setTranslation(prev => prev - 1)
+            }
+            if (clickX > 0 && clickX < window.innerWidth / 2) {
+                if (translation >= 0) {
+                    return
+                }
+                setTranslation(prev => prev + 1)
+            }
+            else {
+                return
+            }
+        }
+    }
+    const swipeMobileEnd = (e) => {
+        if (clickX > 0 && clickX < window.innerWidth / 2) {
+            if (e.changedTouches[0].clientX - clickX > window.innerWidth / 2) {
+                toLeft()
+                const diff = startPos - translation
+                if (translation < -(100 / slidesToShow * slidesToScroll)) {
+                    setTranslation(prev => prev + diff)
+
+                }
+            }
+        }
+        if (clickX > window.innerWidth / 2 && clickX < window.innerWidth) {
+            if (clickX - e.changedTouches[0].clientX > window.innerWidth / 2) {
+                toRight()
+                const diff = startPos - translation
+                if (translation - (100 / slidesToShow * slidesToScroll) > ((-items.length * 100 / slidesToShow) + 100)) {
+                    setTranslation(prev => prev + diff)
+                }
+            }
+        }
+
+        if ((clickX - e.changedTouches[0].clientX < window.innerWidth / 2) && (clickX > window.innerWidth / 2 && clickX < window.innerWidth)) {
+            const diff = startPos - translation
+            setTranslation(prev => prev + diff)
+        }
+        if ((e.changedTouches[0].clientX - clickX < window.innerWidth / 2) && (clickX > 0 && clickX < window.innerWidth / 2)) {
+            const diff = startPos - translation
+            setTranslation(prev => prev + diff)
+        }
+
+        setIsMoving(false)
+    }
+
+
 
     return (
         <Wrapper>
@@ -188,7 +247,9 @@ const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
             </div>
             <ViewBox className="view-box">
                 <Container
-
+                    onTouchStart={swipeMobileStart}
+                    onTouchMove={swipeMobileMove}
+                    onTouchEnd={swipeMobileEnd}
                     onMouseDown={swipeStart}
                     onMouseMove={swipeMove}
                     onMouseUp={swipeEnd}
