@@ -2,7 +2,7 @@
 <br>
 <h2>Following the link you can find first carousel component I made with different approach. <a href="https://github.com/MikeGitFront/carousel">Recommended to see 😄</a></h2>
 
-<h2>Here you can find short <a href="https://imgur.com/a/HIG1fyr">Demo</a></h2> 
+<h2>Here you can find short <a href="https://imgur.com/fPIk8fX">Demo</a></h2> 
 
 <h2><i>Carousel characteristics:</i></h2>
  <ul>
@@ -18,7 +18,7 @@
 Write it in your terminal: 
 
 ```terminal
-//Make sure you don't have folder named 'carousel' in the directory
+//Make sure you don't have folder named 'carousel-second' in the directory
 
 git clone https://github.com/MikeGitFront/carousel-second.git
 ```
