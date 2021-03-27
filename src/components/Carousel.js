@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
@@ -27,6 +27,9 @@ const ButtonLeft = styled.button`
     &:hover {
         color:red;
     }
+    &:disabled {
+        color:rgba(0,0,0,.2);
+    }
 `
 
 const ButtonRight = styled.button`
@@ -39,11 +42,14 @@ const ButtonRight = styled.button`
     &:hover {
         color:red;
     }
+    &:disabled {
+        color:rgba(0,0,0,.2);
+    }
 `
 
 const Container = styled.div`
     display:flex;
-    min-height:300px;
+    min-height:400px;
     transform:translateX(${({ translation }) => translation}%);
     transition:${({ transition }) => transition}s all ease;
 `
@@ -57,20 +63,36 @@ const Item = styled.div`
     z-index:1;
 `
 
-const Carousel = ({ children, slidesToShow, infinite }) => {
+const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
+    const [slidesToShow, setSlidesToShow] = useState(toShow)
+    const [slidesToScroll, setSlidesToScroll] = useState(toScroll)
     const [items] = useState(children)
     const [translation, setTranslation] = useState(0)
     const [transition, setTransition] = useState(0.7)
+    const [leftDisabled, setLeftDisabled] = useState(true)
+    const [rightDisabled, setRightDisabled] = useState(false)
+
+    if (slidesToShow > items.length - 1 || slidesToScroll > slidesToShow) {
+        alert('incorrent slidesToShow or slidesToScroll prop!')
+        setSlidesToShow(1)
+        setSlidesToScroll(1)
+    }
 
     const toLeft = () => {
         if (!infinite) {
-            console.log(translation.toFixed())
-            if (translation.toFixed() === '0') {
+            setRightDisabled(false)
+            if (translation.toFixed() == 0) {
                 return
             }
+            if (translation > -(100 / slidesToShow * slidesToScroll)) {
+                setLeftDisabled(true)
+                setTranslation(prev => prev - translation)
+            }
             else {
-                setTranslation(prev => prev + 100 / slidesToShow)
-
+                if (translation === -(100 / slidesToShow * slidesToScroll)) {
+                    setLeftDisabled(true)
+                }
+                setTranslation(prev => prev + 100 / slidesToShow * slidesToScroll)
             }
         }
         if (infinite) {
@@ -80,14 +102,20 @@ const Carousel = ({ children, slidesToShow, infinite }) => {
 
     const toRight = () => {
         if (!infinite) {
-            console.log(translation)
-            console.log(((-items.length * 100 / slidesToShow) + 100).toFixed(2))
+            setLeftDisabled(false)
             if (translation.toFixed(2) === ((-items.length * 100 / slidesToShow) + 100).toFixed(2)) {
                 return
             }
+            if (translation - (100 / slidesToShow * slidesToScroll) < ((-items.length * 100 / slidesToShow) + 100)) {
+                const diff = ((-items.length * 100 / slidesToShow) + 100) - translation
+                setRightDisabled(true)
+                setTranslation(prev => prev + diff)
+            }
             else {
-                setTranslation(prev => prev - 100 / slidesToShow)
-
+                if (translation - (100 / slidesToShow * slidesToScroll) === ((-items.length * 100 / slidesToShow) + 100)) {
+                    setRightDisabled(true)
+                }
+                setTranslation(prev => prev - 100 / slidesToShow * slidesToScroll)
             }
         }
         if (infinite) {
@@ -95,19 +123,43 @@ const Carousel = ({ children, slidesToShow, infinite }) => {
         }
     }
 
+    const [clickX, setClickX] = useState(null)
+    // const [isMoving, setIsMoving] = useState(false)
+
+    const swipeStart = (e) => {
+        console.log(e.clientX)
+        // setIsMoving(true)
+        setClickX(e.clientX)
+    }
+    const swipeMove = () => {
+
+    }
+    const swipeEnd = (e) => {
+        if (clickX - e.clientX > window.innerWidth / 2) {
+            toRight()
+        }
+        if (e.clientX - clickX > window.innerWidth / 2) {
+            toLeft()
+        }
+        console.log(e.clientX)
+        // setIsMoving(false)
+    }
+
     return (
         <Wrapper>
             <div style={{ display: 'flex' }}>
-                <ButtonLeft onClick={toLeft}><FaArrowLeft /></ButtonLeft>
-                <ButtonRight onClick={toRight}><FaArrowRight /></ButtonRight>
+                <ButtonLeft disabled={leftDisabled} onClick={toLeft}><FaArrowLeft /></ButtonLeft>
+                <ButtonRight disabled={rightDisabled} onClick={toRight}><FaArrowRight /></ButtonRight>
             </div>
             <ViewBox className="view-box">
                 <Container
+                    onMouseDown={swipeStart}
+                    onMouseMove={swipeMove}
+                    onMouseUp={swipeEnd}
                     transition={transition}
                     translation={translation}
                     className="container"
                 >
-                    {console.log(items)}
                     {items.map((item, i) => <Item
                         width={slidesToShow}
                         key={i}
