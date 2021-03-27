@@ -5,8 +5,8 @@ import "./Styles.css";
 const App = () => {
     return (
         <Carousel
-            toShow={3}
-            toScroll={3}
+            toShow={2}
+            toScroll={2}
         >
             <div src="https://wallpapershome.ru/images/wallpapers/ama-dablam-3840x2160-gori-16554.jpg" ></div>
             <div src="https://wallpapershome.ru/images/wallpapers/ama-dablam-3840x2160-gori-16555.jpg" ></div>
