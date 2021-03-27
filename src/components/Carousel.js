@@ -63,6 +63,28 @@ const Item = styled.div`
     z-index:1;
 `
 
+const Dots = styled.div`
+    display:flex;
+    padding:10px 0;
+`
+
+const Dot = styled.button`
+    width:20px;
+    height:20px;
+    outline:none;
+    border:none;
+    cursor:pointer;
+    transition:0.5s all ease;
+    background-color:${({ active }) => active ? 'red' : 'white'};
+    border-radius:20px;
+    box-shadow:${({ active }) => active ? 'inset 0px 0px 2px 2px black' : 'inset 0px 0px 2px 2px black'};
+
+    &:hover {
+        box-shadow:inset 0px 0px 2px 2px black;
+        background-color:blue;
+    }
+`
+
 const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
     const [slidesToShow, setSlidesToShow] = useState(toShow)
     const [slidesToScroll, setSlidesToScroll] = useState(toScroll)
@@ -71,6 +93,11 @@ const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
     const [transition, setTransition] = useState(0.7)
     const [leftDisabled, setLeftDisabled] = useState(true)
     const [rightDisabled, setRightDisabled] = useState(false)
+    const [clickX, setClickX] = useState(null)
+    const [isMoving, setIsMoving] = useState(false)
+    const [startPos, setStartPos] = useState(null)
+    const [index, setIndex] = useState(0)
+
 
     if (slidesToShow > items.length - 1 || slidesToScroll > slidesToShow) {
         alert('incorrent slidesToShow or slidesToScroll prop!')
@@ -93,6 +120,7 @@ const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
             }
             setTranslation(prev => prev + 100 / slidesToShow * slidesToScroll)
         }
+        setIndex(prev => prev - slidesToShow)
     }
 
     const toRight = () => {
@@ -111,11 +139,8 @@ const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
             }
             setTranslation(prev => prev - 100 / slidesToShow * slidesToScroll)
         }
+        setIndex(prev => prev + slidesToShow)
     }
-
-    const [clickX, setClickX] = useState(null)
-    const [isMoving, setIsMoving] = useState(false)
-    const [startPos, setStartPos] = useState(null)
 
     const swipeStart = (e) => {
         setIsMoving(true)
@@ -237,6 +262,27 @@ const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
         setIsMoving(false)
     }
 
+    const goToSlide = (i) => {
+        setIndex(i)
+        if (i >= items.length - slidesToShow) {
+            setRightDisabled(true)
+            setLeftDisabled(false)
+        }
+        if (i === 0) {
+            setRightDisabled(false)
+            setLeftDisabled(true)
+        }
+        if (i !== 0 && i < items.length - slidesToShow) {
+            setRightDisabled(false)
+            setLeftDisabled(false)
+        }
+        if (i < items.length - slidesToShow + 1) {
+            setTranslation(-i * 100 / slidesToShow)
+        }
+        else {
+            setTranslation(-(items.length - slidesToShow) * 100 / slidesToShow)
+        }
+    }
 
 
     return (
@@ -265,6 +311,14 @@ const Carousel = ({ children, toShow = 1, toScroll = 1, infinite }) => {
                     />)}
                 </Container>
             </ViewBox>
+            <Dots>
+                {items.map((item, i) =>
+                    <Dot
+                        active={index === i ? true : false}
+                        key={i}
+                        onClick={() => goToSlide(i)}
+                    />)}
+            </Dots>
         </Wrapper>
     )
 }
